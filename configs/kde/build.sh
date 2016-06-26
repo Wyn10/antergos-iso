@@ -24,7 +24,6 @@ setup_workdir() {
     pacman_conf="${work_dir}/pacman.conf"
     sed -r "s|^#?\\s*CacheDir.+|CacheDir = $(echo -n ${cache_dirs[@]})|g" \
         "${script_path}/pacman.conf.${arch}" > "${pacman_conf}"
-    mkdir -p "/usr/share/antergos-iso/configs/xfce/root-image/etc/"
     cp -Rp /usr/share/antergos-iso/configs/xfce/root-image/etc/hostname ${work_dir}/root-image/etc
     cp -Rp /usr/share/antergos-iso/configs/xfce/root-image/etc/lsb-release ${work_dir}/root-image/etc
 }
