@@ -2,7 +2,7 @@
 
 set -e -u
 
-iso_name=antergos
+iso_name=antergos-xfce
 iso_label="ANTERGOS"
 iso_version=$(date +%Y.%m.%d)
 install_dir="arch"
