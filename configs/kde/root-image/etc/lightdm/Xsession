@@ -62,73 +62,50 @@ if [[ -z "$DBUS_SESSION_BUS_ADDRESS" ]]; then
 	eval `dbus-launch --sh-syntax`
 fi
 
-# Change keyboard layaout
-_current_val="$(gsettings get org.gnome.desktop.input-sources sources)"
-echo "${_current_val}" > /tmp/.input-sources
-if [[ *'[]'* = "${_current_val}" ]]; then
-	gsettings set org.gnome.desktop.input-sources sources "[('xkb','us')]"
-fi
+	# Set KDE in .dmrc
+	echo "[Desktop]" > ${CN_DESTDIR}/home/${CN_USER_NAME}/.dmrc
+	echo "Session=kde-plasma" >> ${CN_DESTDIR}/home/${CN_USER_NAME}/.dmrc
+	chroot ${CN_DESTDIR} chown ${CN_USER_NAME}:users /home/${CN_USER_NAME}/.dmrc
 
-# Enabled extensions
-_extensions="['user-theme@gnome-shell-extensions.gcampax.github.com', 'status-menu-buttons@dev.antergos.com', 'dash-to-dock@micxgx.gmail.com', 'panel-osd@berend.de.schouwer.gmail.com', 'topIcons@adel.gadllah@gmail.com']"
-gsettings set org.gnome.shell enabled-extensions "${_extensions}"
+	# Force QtCurve to use our theme
+	rm -R ${CN_DESTDIR}/usr/share/kstyle/themes/qtcurve.themerc
 
-# Extension - Panel-OSD Settings
-gsettings set org.gnome.shell.extensions.panel-osd x-pos 96.0
-gsettings set org.gnome.shell.extensions.panel-osd y-pos 96.0
-gsettings set org.gnome.shell.extensions.panel-osd force-expand true
+	# Setup user defaults
+	chroot ${CN_DESTDIR} /usr/share/antergos-kde-setup/install.sh ${CN_USER_NAME}
 
-# Extension - dash-to-dock Settings
-gsettings set org.gnome.shell.extensions.dash-to-dock apply-custom-theme false
-gsettings set org.gnome.shell.extensions.dash-to-dock opaque-background true
-gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.5
-gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-running-dots false
-gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink false
+	# Setup root defaults
+	cp -R ${CN_DESTDIR}/etc/skel/.config ${CN_DESTDIR}/root
+	cp ${CN_DESTDIR}/etc/skel/.gtkrc-2.0-kde4 ${CN_DESTDIR}/root
+	chroot ${CN_DESTDIR} "ln -s /root/.gtkrc-2.0-kde4 /root/.gtkrc-2.0"
 
-# Randomly choose a default wallpaper from antergos-wallpapers
-DIR="/usr/share/antergos/wallpapers"
-PIC=$(ls ${DIR}/* | shuf -n1)
+	# When applications transition to Qt5 they will look for config files in the standardized (XDG) locations. Create
+	# symlinks during the transitional period until all apps are updated to use the new config file paths.
+	link_config() {
 
-gsettings set org.gnome.desktop.background picture-uri file://${PIC}
+		if [[ ${1} != "apps:" ]] && [[ ${1} != "" ]]; then
+			app=${1:6}
+			app_old="/home/${CN_USER_NAME}/.kde4/share/apps/${app}"
+			app_new="/home/${CN_USER_NAME}/.local/share/${app}"
+			chroot ${CN_DESTDIR} "ln -s ${app_old}${app_new}" ${CN_USER_NAME}
+		fi
+		if [[ ${2} != "conf:" ]] && [[ ${2} != "" ]]; then
+			conf=${2:6}
+			conf_old="/home/${CN_USER_NAME}/.kde4/share/config/${conf}"
+			conf_new="/home/${CN_USER_NAME}/.config/${conf}"
+			chroot ${CN_DESTDIR} "ln -s ${conf_old}${conf_new}" ${CN_USER_NAME}
+		fi
 
-# Set favorite apps
-gsettings set org.gnome.shell favorite-apps "['Cnchi.desktop', 'nautilus.desktop', 'chromium.desktop', 'pidgin.desktop', 'gnome-music.desktop']"
+	}
 
-# Disable screensaver
-gsettings set org.gnome.desktop.screensaver lock-enabled false
-gsettings set org.gnome.desktop.lockdown disable-lock-screen true
-gsettings set org.gnome.desktop.session idle-delay 0
+	#for i in konsole; do
+	#	link_config apps:${i};
+	#done
+	#for i in kdeglobals; do
+	#	link_config apps: conf:kdeglobals;
+	#done
 
-
-# Set theme
-gsettings set org.gnome.desktop.interface gtk-theme 'Numix-Frost-Light'
-gsettings set org.gnome.desktop.wm.preferences theme 'Numix-Frost-Light'
-gsettings set org.gnome.shell.extensions.user-theme name 'Numix-Frost'
-
-# Set icon theme
-gsettings set org.gnome.desktop.interface icon-theme 'Numix-Square'
-
-# Not show desktop icons
-gsettings set org.gnome.desktop.background show-desktop-icons false
-
-# Minimize and close buttons
-gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
-
-# Don't Disable terminal bell (accessibility concerns)
-gsettings set org.gnome.desktop.wm.preferences audible-bell true
-
-# Configure touchpad
-gsettings set org.gnome.desktop.peripherals.touchpad tap-to-click true
-gsettings set org.gnome.desktop.peripherals.touchpad natural-scroll true
-gsettings set org.gnome.desktop.peripherals.touchpad scroll-method 'two-finger-scrolling'
-
-# Set fonts
-gsettings set org.gnome.desktop.interface font-name 'Open Sans 12'
-gsettings set org.gnome.desktop.wm.preferences titlebar-font 'Open Sans 13'
-gsettings set org.gnome.settings-daemon.plugins.xsettings antialiasing 'rgba'
-
-# Turn on automatic date/time
-gsettings set org.gnome.desktop.datetime automatic-timezone true;
+	## Set default directories
+chroot ${CN_DESTDIR} su -c xdg-user-dirs-update ${CN_USER_NAME}
 
 }
 
