@@ -39,7 +39,6 @@ linux-firmware
 modemmanager
 netctl
 net-tools
-plasma-nm
 networkmanager-openvpn
 networkmanager-pptp
 rp-pppoe
@@ -110,9 +109,38 @@ ttf-opensans
 
 # Desktop
 
-chromium
-chromium-pepper-flash
-antergos-kde-setup
+cdrkit
+evince
+file-roller
+gamin
+gnome-calculator
+gnome-disk-utility
+gnome-keyring
+gvfs-mtp
+light-locker
+light-locker-settings
+mousepad
+network-manager-applet
+networkmanager-openvpn
+networkmanager-pptp
+parole
+pidgin
+polkit-gnome
+pragha
+ristretto
+thunar-archive-plugin
+thunar-volman
+transmission-gtk
+tumbler
+xdg-user-dirs-gtk
+xfce4
+xfburn
+xfce4-battery-plugin
+xfce4-datetime-plugin
+xfce4-notifyd
+xfce4-screenshooter
+xfce4-taskmanager
+xscreensaver
 
 # LightDM
 
