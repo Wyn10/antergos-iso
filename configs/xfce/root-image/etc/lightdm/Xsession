@@ -152,7 +152,6 @@ xfconf-query -c xfce4-panel -p /plugins/plugin-1/button-icon -n -t string -s "/u
 echo "Running set-gsettings..."
 set_gsettings > /tmp/.set_gsettings 2>&1;
 echo "set-gsettings complete"
-gnome-keyring-daemon -rd
 echo "X session wrapper complete, running session $@"
 
 exec $@
